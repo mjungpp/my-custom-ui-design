@@ -1,28 +1,44 @@
 const path = require("path");
-const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  mode: "development", // 배포시 production
-  devtool: "eval", // 배포시 설정은 hidden-source-map, source-map 쓰면 개발자도구에 소스코드 다보임
+  // 개발모드, development or production
+  mode: "development",
+
+  // entry를 기준으로 연관된 모든 파일들을 번들링
+  entry: "./src/index",
+
+  // 번들링 될 파일 확장자 등록
   resolve: {
-    extensions: [".jsx", ".js", ".tsx", ".ts"], // 웹팩에서 처리해주는 확장자들
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
-  entry: {
-    app: "./app.tsx", // 최초 진입점
-  },
-  // module 및 plugin에 적힌 처리과정을 client.tsx에 적용해서 최종적으로 app.js를 뽑아냄 (output)
+
+  // 로더 등록
   module: {
     rules: [
-      // babel 대신 tsc
       {
-        test: /\.tsx?$/, // tsx나 ts파일을 발견하면
-        loader: "ts-loader", // 해당 로더를 통해 버전을 변환함
+        test: /\.tsx?$/,
+        loader: "ts-loader",
+        exclude: ["/node_modules/"],
       },
     ],
   },
+  // 빌드 설정
   output: {
-    filename: "[name].js",
-    path: path.join(__dirname, "dist"),
-    // npm webpacK을 실행하면 client.tsx를 통해서 webpack 처리 후, dist 폴더가 생성되고 그 안에 app.js가 들어있게 됨
+    path: path.resolve(__dirname, "deploy"), // 빌드되는 파일들이 만들어지는 위치, __dirname: 현재 디렉토리
+    filename: "bundle.js", // 번들파일 이름
   },
+
+  // webpack 서버 설정
+  devServer: {
+    static: path.join(__dirname, "deploy"), // 이 경로에 있는 파일이 변경될 때 번들을 다시 컴파일
+    port: 8088,
+  },
+
+  plugins: [
+    new HtmlWebpackPlugin({
+      // index.html에 output에서 만들어진 bundle.js를 적용하여, deploy에 새로운 html 파일 생성
+      template: `./public/index.html`,
+    }),
+  ],
 };
