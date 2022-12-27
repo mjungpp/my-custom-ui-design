@@ -1,7 +1,8 @@
 import React from "react";
+import Test from "./components/Test";
 
-const App = (props) => {
-  return <div></div>;
+const App: React.FC = (): JSX.Element => {
+  return <Test />;
 };
 
 export default App;
